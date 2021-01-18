@@ -135,7 +135,7 @@ Column {data-width=200}
 ###
 **Áreas sivestres protegidas**  
 * C01 - CBI Rio Maria Aguilar  
-* C02 - Corredor Biológico Interurbano Río Torres Reserva de la Biosfera  
+* C02 - CBI Río Torres Reserva de la Biosfera  
 * P02 - Braulio Carrillo  
 * P23 - Volcan Irazú  
 * P24 - Tapanti-Macizo de la Muerte  
