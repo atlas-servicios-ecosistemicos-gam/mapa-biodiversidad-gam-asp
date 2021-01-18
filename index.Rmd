@@ -63,7 +63,7 @@ pal_ndvi <-
 Column {data-width=800}
 -----------------------------------------------------------------------
 
-### {data-height=10}
+### {data-height=15}
 **Servicio ecosistémico de soporte: Hábitat para la biodiversidad (riqueza de especies).**
 
 ### 
