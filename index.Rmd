@@ -134,16 +134,17 @@ Column {data-width=200}
 
 ###
 **Áreas sivestres protegidas**  
-* C01 - CBI Rio Maria Aguilar  
+
+* C01 - CBI Río María Aguilar  
 * C02 - CBI Río Torres Reserva de la Biosfera  
 * P02 - Braulio Carrillo  
 * P23 - Volcan Irazú  
-* P24 - Tapanti-Macizo de la Muerte  
+* P24 - Tapantí-Macizo de la Muerte  
 * R02 - Cordillera Volcanica Central  
 * R06 - Grecia  
-* Z01 - Cerro de Escazu  
+* Z01 - Cerro de Escazú  
 * Z04 - Cerros de La Carpintera  
 * Z05 - El Rodeo  
 * Z06 - Cerro Atenas  
-* Z08 - Rio Tiribi  
-* Z10 - Rio Navarro-Rio Sombrero
+* Z08 - Río Tiribí  
+* Z10 - Río Navarro-Río Sombrero
