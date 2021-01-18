@@ -1,0 +1,149 @@
+---
+title: "Mapa de áreas silvestres protegidas (ASP) en la GAM"
+output: 
+  flexdashboard::flex_dashboard
+---
+
+```{r setup, include=FALSE}
+#-------------------- Paquetes --------------------
+
+library(flexdashboard)
+library(dplyr)
+library(sf)
+library(leaflet)
+library(leafem)
+library(esri2sf)
+library(raster)
+
+#--------------- URL de geoservicios --------------
+
+url_agfs_limite_gam <-
+  "https://services9.arcgis.com/RrvMEynxDB8hycVO/arcgis/rest/services/gam_limite_gam/FeatureServer/0"
+
+url_asp_gam <-
+  "https://raw.githubusercontent.com/atlas-servicios-ecosistemicos-gam/datos-biodiversidad/main/gam/asp_corredores_gam.geojson"
+
+url_raster_ndvi <-
+  "https://raw.githubusercontent.com/atlas-servicios-ecosistemicos-gam/datos-calentamiento-urbano/master/gam/NDVI_GAM_WEB.TIF"
+
+#--------------- Objetos sf y raster ---------------
+
+# Límite de la GAM
+sf_limite_gam <-
+  esri2sf(url_agfs_limite_gam)
+
+# Límite de la GAM (reproyectado a Web Mercator)
+sf_limite_gam_web <- 
+  sf_limite_gam %>%
+  st_transform(3857)
+
+# ASP
+sf_asp_gam <- 
+  st_read(url_asp_gam)
+
+# Capa raster de NDVI (en Web Mercator)
+raster_ndvi <-
+  raster(url_raster_ndvi) %>%
+  crop(sf_limite_gam_web) %>%
+  mask(sf_limite_gam_web)
+
+#---------------- Paletas de colores ---------------
+
+# NDVI
+colores_ndvi <- "Greens"
+pal_ndvi <- 
+  colorNumeric(
+    colores_ndvi, 
+    values(raster_ndvi),
+    na.color = "transparent"
+  )
+
+```
+
+Column {data-width=800}
+-----------------------------------------------------------------------
+
+### {data-height=10}
+**Servicio ecosistémico de soporte: Hábitat para la biodiversidad (riqueza de especies).**
+
+### 
+
+```{r}
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark Matter") %>%
+  addProviderTiles(providers$OpenStreetMap.Mapnik, group = "OpenStreetMap") %>%
+  addProviderTiles(providers$Stamen.TonerLite, group = "Stamen Toner Lite") %>%
+  addProviderTiles(providers$Esri.WorldImagery, group = "Imágenes de ESRI") %>%
+  addPolygons(
+    data = sf_limite_gam,
+    color = "Purple",
+    fillColor = "transparent",
+    stroke = TRUE,
+    weight = 6.0,
+    group = "Límite de la GAM"
+  ) %>%
+  addPolygons(
+    data = sf_asp_gam,
+    color = "Yellow",
+    fillColor = "transparent",
+    stroke = TRUE,
+    weight = 4.0,
+    popup = paste(sf_asp_gam$siglas_cat, sf_asp_gam$nombre_asp),
+    label = ~sf_asp_gam$codigo,
+    labelOptions = labelOptions(noHide = T, direction = "bottom"),
+    group = "ASP"
+  ) %>%  
+  addRasterImage(
+    raster_ndvi, 
+    colors = pal_ndvi,
+    opacity = 0.9,
+    group = "Índice de vegetación (NDVI)"
+  ) %>%  
+  addLegend(
+    title = "NDVI",
+    values = values(raster_ndvi),
+    pal = pal_ndvi,
+    position = "bottomright",
+    group = "Índice de vegetación (NDVI)"
+  ) %>%      
+  addLayersControl(
+    baseGroups = c("CartoDB Dark Matter", "OpenStreetMap", "Stamen Toner Lite", "Imágenes de ESRI"),
+    overlayGroups = c("Límite de la GAM", "ASP", "Índice de vegetación (NDVI)"),
+    options = layersControlOptions(collapsed = TRUE)    
+  ) %>%  
+  addMiniMap(
+    toggleDisplay = TRUE,
+    position = "bottomleft",
+    tiles = providers$CartoDB.DarkMatter
+  ) %>%
+  addScaleBar(
+    position = "bottomleft",
+    options = scaleBarOptions(imperial = FALSE)
+  ) %>%
+  addMouseCoordinates()
+
+```
+
+Column {data-width=200}
+-----------------------------------------------------------------------
+
+### {data-height=50}
+* 13.8 % GAM  
+* 24.468 ha en ASP
+
+###
+**Áreas sivestres protegidas**  
+* C01 - CBI Rio Maria Aguilar  
+* C02 - Corredor Biológico Interurbano Río Torres Reserva de la Biosfera  
+* P02 - Braulio Carrillo  
+* P23 - Volcan Irazú  
+* P24 - Tapanti-Macizo de la Muerte  
+* R02 - Cordillera Volcanica Central  
+* R06 - Grecia  
+* Z01 - Cerro de Escazu  
+* Z04 - Cerros de La Carpintera  
+* Z05 - El Rodeo  
+* Z06 - Cerro Atenas  
+* Z08 - Rio Tiribi  
+* Z10 - Rio Navarro-Rio Sombrero
