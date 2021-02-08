@@ -1,5 +1,5 @@
 ---
-title: "Mapa de áreas silvestres protegidas (ASP) en la GAM"
+title: "Mapa de áreas silvestres protegidas (ASP) en la Gran Área Metropolitana"
 output: 
   flexdashboard::flex_dashboard
 ---
@@ -23,8 +23,8 @@ url_agfs_limite_gam <-
 url_asp_gam <-
   "https://raw.githubusercontent.com/atlas-servicios-ecosistemicos-gam/datos-biodiversidad/main/gam/asp_corredores_gam.geojson"
 
-url_raster_ndvi <-
-  "https://raw.githubusercontent.com/atlas-servicios-ecosistemicos-gam/datos-calentamiento-urbano/master/gam/NDVI_GAM_WEB.TIF"
+url_raster_uso_tierra <-
+  "https://raw.githubusercontent.com/atlas-servicios-ecosistemicos-gam/datos-uso-tierra/master/gam/USO_COBERTURA_GAM_WEB.tif"
 
 #--------------- Objetos sf y raster ---------------
 
@@ -41,22 +41,35 @@ sf_limite_gam_web <-
 sf_asp_gam <- 
   st_read(url_asp_gam)
 
-# Capa raster de NDVI (en Web Mercator)
-raster_ndvi <-
-  raster(url_raster_ndvi) %>%
+# Capa raster de uso de la tierra (en Web Mercator)
+raster_uso_tierra <-
+  raster(url_raster_uso_tierra) %>%
   crop(sf_limite_gam_web) %>%
   mask(sf_limite_gam_web)
 
 #---------------- Paletas de colores ---------------
 
-# NDVI
-colores_ndvi <- "Greens"
-pal_ndvi <- 
-  colorNumeric(
-    colores_ndvi, 
-    values(raster_ndvi),
-    na.color = "transparent"
+colores_uso_tierra <- 
+  c(rgb(236,243,228,maxColorValue=255), rgb(178,209,225,maxColorValue=255), 
+    rgb(52,130,100, maxColorValue=255), rgb(43,99,89,   maxColorValue=255),
+    rgb(122,173,111,maxColorValue=255), rgb(169,183,107,maxColorValue=255),
+    rgb(49,129,117, maxColorValue=255), rgb(69,155,122, maxColorValue=255)
   )
+
+etiquetas_uso_tierra <- 
+  c("Zonas urbanas continuas y discontinuas", "Aguas continentales", 
+    "Bosque secundario temprano", "Bosque secundario medio y tardío",
+    "Café", "Fresas, flores y ornamentales", 
+    "Hortalizas, raíces y tubérculos", "Pastos con árboles y limpios"
+  )
+
+values_uso_tierra <- c(1, 2, 3, 4, 5, 6, 7, 8)
+
+pal <- colorFactor(
+  palette = colores_uso_tierra, 
+  domain = values_uso_tierra,
+  na.color = "transparent"
+)
 
 ```
 
@@ -95,21 +108,21 @@ leaflet() %>%
     group = "ASP"
   ) %>%  
   addRasterImage(
-    raster_ndvi, 
-    colors = pal_ndvi,
-    opacity = 0.9,
-    group = "Índice de vegetación (NDVI)"
-  ) %>%  
+    raster_uso_tierra, 
+    colors = pal, 
+    opacity = 1,
+    group = "Uso de la tierra"
+  ) %>%
   addLegend(
-    title = "NDVI",
-    values = values(raster_ndvi),
-    pal = pal_ndvi,
+    title = "Uso de la tierra", 
     position = "bottomright",
-    group = "Índice de vegetación (NDVI)"
-  ) %>%      
+    colors = colores_uso_tierra, 
+    labels = etiquetas_uso_tierra,
+    group = "Uso de la tierra"
+  ) %>%  
   addLayersControl(
     baseGroups = c("CartoDB Dark Matter", "OpenStreetMap", "Stamen Toner Lite", "Imágenes de ESRI"),
-    overlayGroups = c("Límite de la GAM", "ASP", "Índice de vegetación (NDVI)"),
+    overlayGroups = c("Límite de la GAM", "ASP", "Uso de la tierra"),
     options = layersControlOptions(collapsed = TRUE)    
   ) %>%  
   addMiniMap(
