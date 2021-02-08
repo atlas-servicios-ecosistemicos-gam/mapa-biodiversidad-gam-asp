@@ -98,7 +98,7 @@ leaflet() %>%
   ) %>%
   addPolygons(
     data = sf_asp_gam,
-    color = "Yellow",
+    color = "Blue",
     fillColor = "transparent",
     stroke = TRUE,
     weight = 4.0,
